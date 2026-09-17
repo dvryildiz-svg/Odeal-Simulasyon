@@ -108,18 +108,19 @@ if calistir and file1 and file2 and file3:
             presentation_cols = ['Unvan', 'Kanal'] + last_3_months + [current_month, 'Günlük_Net_Satis', 'Aylık_Ort_Ciro_Gecmis', 'Mevcut_Günlük_Ort', 'Ay_Sonu_Projeksiyonu', 'Alarm', 'Kümülatif_Hakkedis_TL']
             df_presentation = active[presentation_cols].copy()
             
-            # Hafızayı güncelle
             hafiza_kayit = active[['UyeIsyeriID', 'Kanal', current_month]].copy()
             hafiza_kayit.rename(columns={current_month: 'Son_Kumulatif'}, inplace=True)
             hafiza_kayit.to_csv(MEMORY_FILE, index=False)
             
             st.success(f"Veriler başarıyla işlendi! Baz alınan güncel ay: {current_month}")
             
-            col1, col2, col3, col4 = st.columns(4)
+            # 5 Sütunlu Metrik Alanı (Ciro Projeksiyonu Eklendi)
+            col1, col2, col3, col4, col5 = st.columns(5)
             col1.metric("Toplam Kümülatif Ciro", f"₺{active[current_month].sum():,.2f}")
             col2.metric("Günlük Net Satış (Fark)", f"₺{active['Günlük_Net_Satis'].sum():,.2f}")
-            col3.metric("Mevcut Kümülatif Hakkediş", f"₺{active['Kümülatif_Hakkedis_TL'].sum():,.2f}")
-            col4.metric("Ay Sonu Hakkediş Projeksiyonu", f"₺{active['Projeksiyon_Hakkedis_TL'].sum():,.2f}")
+            col3.metric("Ay Sonu Ciro Projeksiyonu", f"₺{active['Ay_Sonu_Projeksiyonu'].sum():,.2f}")
+            col4.metric("Mevcut Kümülatif Hakkediş", f"₺{active['Kümülatif_Hakkedis_TL'].sum():,.2f}")
+            col5.metric("Ay Sonu Hakkediş Projeksiyonu", f"₺{active['Projeksiyon_Hakkedis_TL'].sum():,.2f}")
             
             st.markdown("---")
             
