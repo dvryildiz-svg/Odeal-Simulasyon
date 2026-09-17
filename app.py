@@ -11,7 +11,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 st.set_page_config(page_title="Ödeal Ciro Simülasyonu", layout="wide")
 
 st.title("📊 Ödeal Ciro & Hakkediş Simülasyonu")
-st.markdown("Günlük kümülatif raporları tekilleştirin, net günlük satışları, geçmiş ay kıyaslamalarını ve hakkedişlerinizi otomatik görün.")
+st.markdown("Günlük kümülatif raporları tekilleştirin, net günlük satışları, geçmiş ay kıyaslamalarını ve projeksiyonları otomatik görün.")
 
 MEMORY_DIR = "veri_hafizasi"
 if not os.path.exists(MEMORY_DIR):
@@ -100,8 +100,6 @@ if calistir and file1 and file2 and file3:
             active['Ay_Sonu_Projeksiyonu'] = active['Mevcut_Günlük_Ort'] * toplam_gun
             
             active['Hakkedis_Orani'] = active['Kanal'].apply(get_hakkedis_rate)
-            
-            # Güncel ve Geçmiş Ay Hak Edişleri
             active['Kümülatif_Hakkedis_TL'] = active[current_month] * active['Hakkedis_Orani']
             active['Gecmis_Ay_Hakkedis_TL'] = active[prev_month] * active['Hakkedis_Orani']
             active['Projeksiyon_Hakkedis_TL'] = active['Ay_Sonu_Projeksiyonu'] * active['Hakkedis_Orani']
@@ -109,7 +107,7 @@ if calistir and file1 and file2 and file3:
             active['Alarm'] = np.where(active['Mevcut_Günlük_Ort'] < active['Günlük_Ort_Ciro_Gecmis'], '📉 Ortalama Altı', '✅ İyi')
             active = active.sort_values(by=current_month, ascending=False)
             
-            presentation_cols = ['Unvan', 'Kanal', prev_month, current_month, 'Günlük_Net_Satis', 'Gecmis_Ay_Hakkedis_TL', 'Kümülatif_Hakkedis_TL', 'Ay_Sonu_Projeksiyonu', 'Alarm']
+            presentation_cols = ['Unvan', 'Kanal', prev_month, current_month, 'Günlük_Net_Satis', 'Ay_Sonu_Projeksiyonu', 'Gecmis_Ay_Hakkedis_TL', 'Kümülatif_Hakkedis_TL', 'Projeksiyon_Hakkedis_TL', 'Alarm']
             df_presentation = active[presentation_cols].copy()
             
             hafiza_kayit = active[['UyeIsyeriID', 'Kanal', current_month]].copy()
@@ -118,14 +116,15 @@ if calistir and file1 and file2 and file3:
             
             st.success(f"Veriler başarıyla işlendi! Güncel Ay: {current_month} | Önceki Ay: {prev_month}")
             
-            # Üst Metrik Kartları
-            col1, col2, col3, col4, col5, col6 = st.columns(6)
-            col1.metric(f"Geçmiş Ay ({prev_month}) Ciro", f"₺{active[prev_month].sum():,.2f}")
-            col2.metric(f"Geçmiş Ay Hak Ediş", f"₺{active['Gecmis_Ay_Hakkedis_TL'].sum():,.2f}")
+            # Üst Metrik Kartları (7 Sütunlu Tam Görünüm)
+            col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+            col1.metric(f"Geçhmiş Ay ({prev_month}) Ciro", f"₺{active[prev_month].sum():,.2f}")
+            col2.metric("Geçmiş Ay Hak Ediş", f"₺{active['Gecmis_Ay_Hakkedis_TL'].sum():,.2f}")
             col3.metric("Toplam Kümülatif Ciro", f"₺{active[current_month].sum():,.2f}")
             col4.metric("Günlük Net Satış (Fark)", f"₺{active['Günlük_Net_Satis'].sum():,.2f}")
-            col5.metric("Mevcut Kümülatif Hak Ediş", f"₺{active['Kümülatif_Hakkedis_TL'].sum():,.2f}")
-            col6.metric("Ay Sonu Hak Ediş Proj.", f"₺{active['Projeksiyon_Hakkedis_TL'].sum():,.2f}")
+            col5.metric("Ay Sonu Ciro Proj.", f"₺{active['Ay_Sonu_Projeksiyonu'].sum():,.2f}")
+            col6.metric("Mevcut Hak Ediş", f"₺{active['Kümülatif_Hakkedis_TL'].sum():,.2f}")
+            col7.metric("Ay Sonu Hak Ediş Proj.", f"₺{active['Projeksiyon_Hakkedis_TL'].sum():,.2f}")
             
             st.markdown("---")
             
@@ -136,6 +135,7 @@ if calistir and file1 and file2 and file3:
                     Gecmis_Ay_Ciro=(prev_month, 'sum'),
                     Net_Satis_Bugun=('Günlük_Net_Satis', 'sum'),
                     Kümülatif_Ciro=(current_month, 'sum'),
+                    Ciro_Projeksiyonu=('Ay_Sonu_Projeksiyonu', 'sum'),
                     Gecmis_Ay_Hakkedis=('Gecmis_Ay_Hakkedis_TL', 'sum'),
                     Kümülatif_Hakkedis=('Kümülatif_Hakkedis_TL', 'sum')
                 ).reset_index()
