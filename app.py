@@ -91,7 +91,7 @@ if calistir and file1 and file2 and file3:
                 active['Günlük_Net_Satis'] = np.where(active['Günlük_Net_Satis'] < 0, 0, active['Günlük_Net_Satis'])
             else:
                 active['Günlük_Net_Satis'] = 0
-                st.info("💡 Sistem ilk kez çalıştırıldı. 'Günlük Net Satış' yarından itibaren tam hesaplanacaktır.")
+                st.info("💡 Sistem ilk kez çalıştırıldı. 'Günlük Net Satış' sonraki yüklemelerde net olarak hesaplanacaktır.")
 
             active['Aylık_Ort_Ciro_Gecmis'] = active[last_3_months].mean(axis=1)
             active['Günlük_Ort_Ciro_Gecmis'] = active['Aylık_Ort_Ciro_Gecmis'] / toplam_gun
@@ -108,6 +108,7 @@ if calistir and file1 and file2 and file3:
             presentation_cols = ['Unvan', 'Kanal'] + last_3_months + [current_month, 'Günlük_Net_Satis', 'Aylık_Ort_Ciro_Gecmis', 'Mevcut_Günlük_Ort', 'Ay_Sonu_Projeksiyonu', 'Alarm', 'Kümülatif_Hakkedis_TL']
             df_presentation = active[presentation_cols].copy()
             
+            # Hafızayı güncelle
             hafiza_kayit = active[['UyeIsyeriID', 'Kanal', current_month]].copy()
             hafiza_kayit.rename(columns={current_month: 'Son_Kumulatif'}, inplace=True)
             hafiza_kayit.to_csv(MEMORY_FILE, index=False)
